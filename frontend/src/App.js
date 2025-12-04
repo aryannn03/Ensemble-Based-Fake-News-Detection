@@ -5,6 +5,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import InputBox from './components/InputBox';
+import ResultBox from './components/ResultBox';
+import ExplanationBox from './components/ExplanationBox';
 
 // Home component (you can replace this with your actual home page)
 const Home = () => {
