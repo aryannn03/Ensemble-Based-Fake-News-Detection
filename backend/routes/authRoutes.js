@@ -10,19 +10,27 @@ const {
 
 const { auth, isUser, isAdmin } = require("../middleware/auth");
 
+// Public routes
 router.post("/signup", signup);
 router.post("/login", login);
 
+// Protected
 router.get("/me", auth, getMe);
-
-
 router.post("/logout", auth, logout);
 
 
-router.get("/admin/check", auth, isAdmin, (req, res) => {
-  return res.json({
+router.get("/user/check", auth, isUser, (req, res) => {
+  res.json({
     success: true,
-    message: "Admin route accessed",
+    message: "User route accessed successfully",
+    user: req.user,
+  });
+});
+
+router.get("/admin/check", auth, isAdmin, (req, res) => {
+  res.json({
+    success: true,
+    message: "Admin route accessed successfully",
     user: req.user,
   });
 });
