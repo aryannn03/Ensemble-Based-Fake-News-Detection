@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ResultBox from './ResultBox';
 import ExplanationBox from './ExplanationBox';
+import '../App.css';
 
 const InputBox = () => {
   const [text, setText] = useState('');
