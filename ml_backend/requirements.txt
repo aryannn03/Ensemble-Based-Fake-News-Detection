@@ -9,3 +9,5 @@ flask
 requests
 shap
 xgboost
+flask-cors
+nltk
