@@ -10,11 +10,10 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const { signup, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
       navigate('/', { replace: true });
@@ -46,20 +45,22 @@ const Signup = () => {
 
     try {
       const result = await signup(name, email, password);
-      
-      if (result.success) {
+
+      if (result?.success) {
         navigate('/');
       } else {
-        setError(result.message || 'Signup failed. Please try again.');
+        console.warn("Signup failed:", result);
+        setError("Signup failed. Please check your details or try again later.");
       }
+
     } catch (err) {
-      setError(err.message || 'An error occurred. Please try again.');
+      console.error("Signup Error:", err);
+      setError("Something went wrong. Please try again later.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Show loading while checking authentication
   if (authLoading) {
     return (
       <div className="signup-container">
@@ -74,7 +75,7 @@ const Signup = () => {
     <div className="signup-container">
       <div className="signup-card">
         <h2 className="signup-title">Sign Up</h2>
-        
+
         {error && (
           <div className="signup-error">
             {error}
@@ -83,9 +84,7 @@ const Signup = () => {
 
         <form onSubmit={handleSubmit} className="signup-form">
           <div className="signup-form-group">
-            <label htmlFor="name" className="signup-label">
-              Name
-            </label>
+            <label htmlFor="name" className="signup-label">Name</label>
             <input
               type="text"
               id="name"
@@ -98,9 +97,7 @@ const Signup = () => {
           </div>
 
           <div className="signup-form-group">
-            <label htmlFor="email" className="signup-label">
-              Email
-            </label>
+            <label htmlFor="email" className="signup-label">Email</label>
             <input
               type="email"
               id="email"
@@ -113,9 +110,7 @@ const Signup = () => {
           </div>
 
           <div className="signup-form-group">
-            <label htmlFor="password" className="signup-label">
-              Password
-            </label>
+            <label htmlFor="password" className="signup-label">Password</label>
             <input
               type="password"
               id="password"
@@ -129,9 +124,7 @@ const Signup = () => {
           </div>
 
           <div className="signup-form-group">
-            <label htmlFor="confirmPassword" className="signup-label">
-              Confirm Password
-            </label>
+            <label htmlFor="confirmPassword" className="signup-label">Confirm Password</label>
             <input
               type="password"
               id="confirmPassword"
@@ -144,11 +137,7 @@ const Signup = () => {
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="signup-button"
-          >
+          <button type="submit" disabled={loading} className="signup-button">
             {loading ? 'Signing up...' : 'Sign Up'}
           </button>
         </form>
@@ -165,4 +154,3 @@ const Signup = () => {
 };
 
 export default Signup;
-
