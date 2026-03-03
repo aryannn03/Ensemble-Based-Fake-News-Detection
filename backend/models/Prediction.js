@@ -2,50 +2,48 @@ const mongoose = require("mongoose");
 
 const predictionSchema = new mongoose.Schema(
   {
-    // Which user made this prediction
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
 
-    // The news text that user submitted
     text: {
       type: String,
       required: true,
       trim: true,
     },
 
-    // Which model was used
-    modelUsed: {
-      type: String,
-      enum: ["ensemble", "classical", "transformer"],
-      default: "ensemble",
-    },
-
-    // Final label returned by ML model
+    // Final prediction: Fake or Real
     finalLabel: {
       type: String,
-      enum: ["FAKE", "REAL"],
-      default: "FAKE",
+      enum: ["Fake", "Real"],
+      required: true,
     },
 
-    // Final confidence
-    finalConfidence: {
+    // Confidence percentage (0–100)
+    confidencePercentage: {
       type: Number,
-      default: 0,
+      required: true,
     },
 
-    // store raw ML response / per-model outputs later
-    subModelOutputs: {
-      type: Object, // flexible JSON
-      default: {},
-    },
-
-    // ID if Flask returns some prediction_id
-    externalPredictionId: {
+    // Confidence description text
+    confidenceLevel: {
       type: String,
-      default: null,
+      required: true,
+    },
+
+    // Words influencing the prediction
+    keyInfluentialWords: [
+      {
+        word: String,
+        influencePercentage: Number,
+        influenceLevel: String,
+      },
+    ],
+
+    explanationNote: {
+      type: String,
     },
   },
   {
