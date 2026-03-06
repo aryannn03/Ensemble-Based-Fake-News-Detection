@@ -35,16 +35,7 @@ def predict():
 
         result = predict_news(text)
 
-        clean_response = {
-            "final_prediction": result["final_prediction"],
-            "confidence": result["confidence"],
-            "confidence_note": result["confidence_note"]
-        }
-
-        return jsonify({
-            "success": True,
-            "result": clean_response
-        })
+        return jsonify(result)
 
     except Exception as e:
         print("ERROR in /predict:")

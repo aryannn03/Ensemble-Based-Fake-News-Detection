@@ -1,10 +1,16 @@
 import os
 import sys
+import shap
 import numpy as np
 import torch
 import torch.nn.functional as F
 from joblib import load
 from transformers import DistilBertTokenizerFast, DistilBertForSequenceClassification
+from explainability import (
+    explain_meta,
+    explain_random_forest,
+    explain_transformer
+)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))   
 PROJECT_ROOT = os.path.dirname(BASE_DIR)               
@@ -34,7 +40,8 @@ STATE_DICT = saved["model_state_dict"]
 tokenizer = DistilBertTokenizerFast.from_pretrained(MODEL_NAME)
 bert_model = DistilBertForSequenceClassification.from_pretrained(
     MODEL_NAME,
-    num_labels=NUM_LABELS
+    num_labels=NUM_LABELS,
+    attn_implementation="eager"
 )
 bert_model.load_state_dict(STATE_DICT)
 
@@ -103,6 +110,47 @@ def predict_news(text: str):
         meta_clf.predict_proba(meta_input)[0][meta_pred_idx]
     )
 
+# SHAP feature
+
+    meta_explainer = shap.TreeExplainer(meta_clf)
+    rf_explainer = shap.TreeExplainer(rf_model)
+
+    meta_explanation = explain_meta(
+        meta_explainer,
+        meta_clf,
+        meta_input,
+        meta_pred_idx
+    )
+
+    # Determine dominant model
+    bert_importance = abs(meta_explanation["bert_prob_fake"]) + \
+                      abs(meta_explanation["bert_prob_real"])
+
+    rf_importance = abs(meta_explanation["rf_prob_fake"]) + \
+                    abs(meta_explanation["rf_prob_real"])
+
+    dominant_model = (
+        "transformer"
+        if bert_importance > rf_importance
+        else "random_forest"
+    )
+
+    # Word level explanation depending on the dominant model
+    if dominant_model == "transformer":
+        word_explanation = explain_transformer(
+            bert_model,
+            tokenizer,
+            cleaned_text,
+            MAX_LEN
+        )
+    else:
+        word_explanation = explain_random_forest(
+            rf_explainer,
+            rf_model,
+            vectorizer,
+            cleaned_text
+        )
+
     CONF_THRESHOLD = 0.6
     if meta_confidence >= CONF_THRESHOLD:
         reliability_note = "High confidence prediction"
@@ -113,7 +161,11 @@ def predict_news(text: str):
         )
 
     return {
-        "final_prediction": meta_pred_label,
-        "confidence": round(meta_confidence, 4),
-        "confidence_note": reliability_note,
-    }
+    "prediction": meta_pred_label.capitalize(),
+    "confidence_percentage": round(meta_confidence * 100, 2),
+    "confidence_level": reliability_note,
+    "key_influential_words": word_explanation,
+    "explanation_note": (
+        "Highlighted words influenced the model’s decision more strongly than other words in the article."
+    )
+}
