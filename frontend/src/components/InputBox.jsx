@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ResultBox from './ResultBox';
 import ExplanationBox from './ExplanationBox';
+import InfluentialWordsGraph from './InfluentialWordsGraph';
+import { analyzeNews } from '../services/predictionService';
 import '../App.css';
 
 const InputBox = () => {
@@ -10,6 +12,10 @@ const InputBox = () => {
   const [explanation, setExplanation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [confidence, setConfidence] = useState(null);
+  const [confidenceLevel, setConfidenceLevel] = useState(null);
+  const [keyInfluentialWords, setKeyInfluentialWords] = useState(null);
+  const [analysisId, setAnalysisId] = useState(null);
+  const [timestamp, setTimestamp] = useState(null);
   
   // Remove unused user variable or use it
   // Option 1: Remove it (if not using it)
@@ -27,68 +33,29 @@ const InputBox = () => {
     setResult(null);
     setExplanation(null);
     setConfidence(null);
+    setConfidenceLevel(null);
+    setKeyInfluentialWords(null);
+    setAnalysisId(null);
+    setTimestamp(null);
 
     try {
-      // Simulate API call with mock data
-      const mockData = await simulateAPICall(text);
+      // Call the real ML backend API
+      const data = await analyzeNews(text);
       
-      setResult(mockData.result);
-      setExplanation(mockData.explanation);
-      setConfidence(mockData.confidence);
+      setResult(data.prediction);
+      setExplanation(data.explanation_note);
+      setConfidence(data.confidence_percentage);
+      setConfidenceLevel(data.confidence_level);
+      setKeyInfluentialWords(data.key_influential_words);
+      setAnalysisId(data.analysisId);
+      setTimestamp(data.timestamp);
       
     } catch (error) {
       console.error('Error detecting fake news:', error);
       setResult('Error');
-      setExplanation('An error occurred while processing your request. Please try again later.');
+      setExplanation(error.message || 'An error occurred while processing your request. Please try again later.');
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Mock API simulation
-  const simulateAPICall = async (inputText) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Simple mock detection logic
-    const keywords = {
-      fake: ['breaking', 'shocking', 'exposed', 'secret', 'urgent', 'must read', 'you won\'t believe'],
-      real: ['according to', 'sources say', 'research shows', 'study finds', 'official statement']
-    };
-    
-    const textLower = inputText.toLowerCase();
-    let fakeCount = 0;
-    let realCount = 0;
-    
-    keywords.fake.forEach(word => {
-      if (textLower.includes(word)) fakeCount++;
-    });
-    
-    keywords.real.forEach(word => {
-      if (textLower.includes(word)) realCount++;
-    });
-    
-    const total = fakeCount + realCount;
-    const fakeProbability = total > 0 ? (fakeCount / total) * 100 : 50;
-    
-    if (fakeProbability > 70) {
-      return {
-        result: 'Fake News',
-        explanation: 'The text contains several sensationalist keywords commonly found in misleading content. It shows characteristics of clickbait or exaggerated claims.',
-        confidence: Math.round(fakeProbability)
-      };
-    } else if (fakeProbability < 30) {
-      return {
-        result: 'Real News',
-        explanation: 'The text appears to be from credible sources with factual reporting language. It lacks common sensationalist markers.',
-        confidence: Math.round(100 - fakeProbability)
-      };
-    } else {
-      return {
-        result: 'Unverified',
-        explanation: 'The content shows mixed signals. Some elements suggest credibility while others raise concerns. Further verification from multiple sources is recommended.',
-        confidence: Math.round(100 - Math.abs(50 - fakeProbability) * 2)
-      };
     }
   };
 
@@ -97,6 +64,10 @@ const InputBox = () => {
     setResult(null);
     setExplanation(null);
     setConfidence(null);
+    setConfidenceLevel(null);
+    setKeyInfluentialWords(null);
+    setAnalysisId(null);
+    setTimestamp(null);
   };
 
   return (
@@ -154,8 +125,9 @@ const InputBox = () => {
         </div>
       </form>
 
-      {result && <ResultBox result={result} confidence={confidence} />}
-      {explanation && <ExplanationBox explanation={explanation} />}
+      {result && <ResultBox result={result} confidence={confidence} confidenceLevel={confidenceLevel} keyInfluentialWords={keyInfluentialWords} analysisId={analysisId} timestamp={timestamp} />}
+      {explanation && <ExplanationBox explanation={explanation} confidence={confidence} keyInfluentialWords={keyInfluentialWords} explanationData={{ key_influential_words: keyInfluentialWords }} />}
+      {keyInfluentialWords && <InfluentialWordsGraph words={keyInfluentialWords} />}
     </div>
   );
 };
