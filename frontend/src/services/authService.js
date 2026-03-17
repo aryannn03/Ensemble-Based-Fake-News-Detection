@@ -145,6 +145,32 @@ export const getMe = async () => {
   }
 };
 
+// Forgot password - sends reset link to email
+export const forgotPassword = async (email) => {
+  try {
+    const response = await apiRequest('/auth/forgot-password', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Reset password - using token from email
+export const resetPassword = async (token, newPassword) => {
+  try {
+    const response = await apiRequest('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, newPassword }),
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Export token management functions
 export { getToken, setToken, removeToken };
 

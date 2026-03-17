@@ -1,6 +1,7 @@
 import React from 'react';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const ResultBox = ({ result, confidence }) => {
+const ResultBox = ({ result, confidence, confidenceLevel, keyInfluentialWords }) => {
   const getResultDetails = () => {
     if (!result) return null;
     
@@ -8,7 +9,7 @@ const ResultBox = ({ result, confidence }) => {
     
     if (resultLower.includes('fake')) {
       return {
-        icon: '❌',
+        icon: '',
         title: 'Fake News Detected',
         color: '#e74c3c',
         bgColor: '#fdeded',
@@ -50,6 +51,21 @@ const ResultBox = ({ result, confidence }) => {
   };
 
   const details = getResultDetails();
+
+  // Generate chart data from keyInfluentialWords - Real data from backend
+  const getChartData = () => {
+    // Always try to use the data from backend
+    if (keyInfluentialWords && Array.isArray(keyInfluentialWords) && keyInfluentialWords.length > 0) {
+      return keyInfluentialWords.slice(0, 8).map((word, idx) => ({
+        word: word.word || `word${idx}`,
+        value: Number(word.influence_percentage) || 0
+      }));
+    }
+    return [];
+  };
+
+  const chartData = getChartData();
+  const hasChartData = chartData.length > 0;
 
   if (!details) return null;
 
@@ -94,6 +110,13 @@ const ResultBox = ({ result, confidence }) => {
           </div>
         )}
         
+        {confidenceLevel && (
+          <div className="result-item confidence-level-item">
+            <span className="result-label">Reliability:</span>
+            <span className="confidence-level-text">{confidenceLevel}</span>
+          </div>
+        )}
+        
         <div className="result-item">
           <span className="result-label">Analysis ID:</span>
           <span className="result-value">
@@ -119,6 +142,51 @@ const ResultBox = ({ result, confidence }) => {
             ' Exercise caution and cross-verify with trusted news outlets.'}
         </div>
       </div>
+      
+      {/* Word Influence Chart - Using Real Data from Backend */}
+      {hasChartData && (
+        <div className="result-chart-section">
+          <h4>Word Influence on Prediction</h4>
+          <ResponsiveContainer width="100%" height={200}>
+            <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="colorValueResult" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={details.color} stopOpacity={0.8}/>
+                  <stop offset="95%" stopColor={details.color} stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis 
+                dataKey="word" 
+                tick={{ fontSize: 11, fill: '#6b7280' }}
+                axisLine={{ stroke: '#e5e7eb' }}
+              />
+              <YAxis 
+                tick={{ fontSize: 11, fill: '#6b7280' }}
+                axisLine={{ stroke: '#e5e7eb' }}
+                domain={[0, 100]}
+              />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: '#fff', 
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}
+                formatter={(value) => [`${value}%`, 'Influence']}
+              />
+              <Area 
+                type="monotone" 
+                dataKey="value" 
+                stroke={details.color} 
+                strokeWidth={2}
+                fillOpacity={1} 
+                fill="url(#colorValueResult)" 
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 };
