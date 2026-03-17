@@ -7,8 +7,9 @@ import Signup from './pages/Signup';
 import InputBox from './components/InputBox';
 import ResultBox from './components/ResultBox';
 import ExplanationBox from './components/ExplanationBox';
+import './App.css'; // ✅ IMPORTANT: Import CSS
 
-// Home component (you can replace this with your actual home page)
+// Home component
 const Home = () => {
   const { user, logout } = useAuth();
 
@@ -17,20 +18,23 @@ const Home = () => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+    <div className="home-container">
+      <div className="home-header">
         <h1>Fake News Detection</h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+
+        <div className="user-info">
           {user && (
-            <div>
-              <span>Welcome, {user.name}!</span>
-            </div>
+            <span className="welcome-text">
+              Welcome, {user.name}!
+            </span>
           )}
-          <button onClick={handleLogout} style={{ padding: '8px 16px', cursor: 'pointer' }}>
+
+          <button onClick={handleLogout} className="logout-btn">
             Logout
           </button>
         </div>
       </div>
+
       <InputBox />
     </div>
   );
@@ -57,4 +61,3 @@ function App() {
 }
 
 export default App;
-

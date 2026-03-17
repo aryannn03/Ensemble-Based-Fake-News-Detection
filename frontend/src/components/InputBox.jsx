@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import ResultBox from './ResultBox';
 import ExplanationBox from './ExplanationBox';
+import InfluentialWordsGraph from './InfluentialWordsGraph';
 import '../App.css';
 
 const InputBox = () => {
@@ -10,6 +11,8 @@ const InputBox = () => {
   const [explanation, setExplanation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [confidence, setConfidence] = useState(null);
+  const [confidenceLevel, setConfidenceLevel] = useState(null);
+  const [keyInfluentialWords, setKeyInfluentialWords] = useState(null);
   
   // Remove unused user variable or use it
   // Option 1: Remove it (if not using it)
@@ -27,14 +30,18 @@ const InputBox = () => {
     setResult(null);
     setExplanation(null);
     setConfidence(null);
+    setConfidenceLevel(null);
+    setKeyInfluentialWords(null);
 
     try {
-      // Simulate API call with mock data
+      // Simulate API call with mock data (matching new JSON structure)
       const mockData = await simulateAPICall(text);
       
-      setResult(mockData.result);
-      setExplanation(mockData.explanation);
-      setConfidence(mockData.confidence);
+      setResult(mockData.prediction);
+      setExplanation(mockData.explanation_note);
+      setConfidence(mockData.confidence_percentage);
+      setConfidenceLevel(mockData.confidence_level);
+      setKeyInfluentialWords(mockData.key_influential_words);
       
     } catch (error) {
       console.error('Error detecting fake news:', error);
@@ -45,49 +52,106 @@ const InputBox = () => {
     }
   };
 
-  // Mock API simulation
+  // Mock API simulation - returns new JSON structure matching backend
   const simulateAPICall = async (inputText) => {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1500));
     
     // Simple mock detection logic
     const keywords = {
-      fake: ['breaking', 'shocking', 'exposed', 'secret', 'urgent', 'must read', 'you won\'t believe'],
-      real: ['according to', 'sources say', 'research shows', 'study finds', 'official statement']
+      fake: ['breaking', 'shocking', 'exposed', 'secret', 'urgent', 'must read', 'you won\'t believe', 'government', 'announces', 'tax'],
+      real: ['according to', 'sources say', 'research shows', 'study finds', 'official statement', 'confirmed', 'verified']
     };
     
     const textLower = inputText.toLowerCase();
     let fakeCount = 0;
     let realCount = 0;
+    let detectedFakeWords = [];
+    let detectedRealWords = [];
     
     keywords.fake.forEach(word => {
-      if (textLower.includes(word)) fakeCount++;
+      if (textLower.includes(word)) {
+        fakeCount++;
+        detectedFakeWords.push(word);
+      }
     });
     
     keywords.real.forEach(word => {
-      if (textLower.includes(word)) realCount++;
+      if (textLower.includes(word)) {
+        realCount++;
+        detectedRealWords.push(word);
+      }
     });
     
     const total = fakeCount + realCount;
     const fakeProbability = total > 0 ? (fakeCount / total) * 100 : 50;
     
+    // Generate mock influential words based on detected keywords
+    const generateInfluentialWords = (fakeWords, realWords, isFake) => {
+      const words = [];
+      const baseWords = isFake ? fakeWords : realWords;
+      
+      // Add detected keywords with high influence
+      baseWords.forEach((word, idx) => {
+        words.push({
+          word: word,
+          influence_percentage: 25 - (idx * 3),
+          influence_level: idx < 2 ? 'High' : 'Medium'
+        });
+      });
+      
+      // Always add some default words to ensure chart displays
+      if (words.length === 0) {
+        words.push({
+          word: isFake ? 'claim' : 'source',
+          influence_percentage: 15,
+          influence_level: 'Medium'
+        });
+        words.push({
+          word: isFake ? 'report' : 'official',
+          influence_percentage: 10,
+          influence_level: 'Low'
+        });
+      } else {
+        // Add some additional context words
+        words.push({
+          word: 'news',
+          influence_percentage: 8,
+          influence_level: 'Low'
+        });
+        words.push({
+          word: 'report',
+          influence_percentage: 5,
+          influence_level: 'Low'
+        });
+      }
+      
+      return words.slice(0, 5);
+    };
+    
     if (fakeProbability > 70) {
       return {
-        result: 'Fake News',
-        explanation: 'The text contains several sensationalist keywords commonly found in misleading content. It shows characteristics of clickbait or exaggerated claims.',
-        confidence: Math.round(fakeProbability)
+        prediction: 'Fake',
+        confidence_percentage: Math.round(fakeProbability * 0.8 + Math.random() * 20),
+        confidence_level: 'Medium confidence. Some indicators suggest potential misinformation.',
+        key_influential_words: generateInfluentialWords(detectedFakeWords, detectedRealWords, true),
+        explanation_note: 'Highlighted words influenced the model\'s decision more strongly than other words in the article.'
       };
     } else if (fakeProbability < 30) {
       return {
-        result: 'Real News',
-        explanation: 'The text appears to be from credible sources with factual reporting language. It lacks common sensationalist markers.',
-        confidence: Math.round(100 - fakeProbability)
+        prediction: 'Real',
+        confidence_percentage: Math.round((100 - fakeProbability) * 0.8 + Math.random() * 20),
+        confidence_level: 'High confidence. Content shows characteristics of credible journalism.',
+        key_influential_words: generateInfluentialWords(detectedFakeWords, detectedRealWords, false),
+        explanation_note: 'Highlighted words influenced the model\'s decision more strongly than other words in the article.'
       };
     } else {
       return {
-        result: 'Unverified',
-        explanation: 'The content shows mixed signals. Some elements suggest credibility while others raise concerns. Further verification from multiple sources is recommended.',
-        confidence: Math.round(100 - Math.abs(50 - fakeProbability) * 2)
+        prediction: 'Unverified',
+        confidence_percentage: Math.round(50 + Math.random() * 20),
+        confidence_level: 'Low confidence prediction. Input may belong to a different domain or be ambiguous.',
+        key_influential_words: generateInfluentialWords(detectedFakeWords, detectedRealWords, fakeProbability > 50),
+        explanation_note: 'Highlighted words influenced the model\'s decision more strongly than other words in the article.'
       };
     }
   };
@@ -97,6 +161,8 @@ const InputBox = () => {
     setResult(null);
     setExplanation(null);
     setConfidence(null);
+    setConfidenceLevel(null);
+    setKeyInfluentialWords(null);
   };
 
   return (
@@ -154,8 +220,9 @@ const InputBox = () => {
         </div>
       </form>
 
-      {result && <ResultBox result={result} confidence={confidence} />}
-      {explanation && <ExplanationBox explanation={explanation} />}
+      {result && <ResultBox result={result} confidence={confidence} confidenceLevel={confidenceLevel} keyInfluentialWords={keyInfluentialWords} />}
+      {explanation && <ExplanationBox explanation={explanation} confidence={confidence} keyInfluentialWords={keyInfluentialWords} explanationData={{ key_influential_words: keyInfluentialWords }} />}
+      {keyInfluentialWords && <InfluentialWordsGraph words={keyInfluentialWords} />}
     </div>
   );
 };

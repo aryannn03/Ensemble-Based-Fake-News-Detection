@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { forgotPassword } from '../services/authService';
 import '../style/Login.css';
 
 const Login = () => {
@@ -8,11 +9,14 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // NEW STATE
+  const [forgotMode, setForgotMode] = useState(false);
+  const [message, setMessage] = useState('');
   
   const { login, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already authenticated
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
       navigate('/', { replace: true });
@@ -24,19 +28,30 @@ const Login = () => {
     setError('');
     setLoading(true);
 
-    if (!email || !password) {
+    if (!email || (!forgotMode && !password)) {
       setError('Please fill in all fields');
       setLoading(false);
       return;
     }
 
     try {
-      const result = await login(email, password);
-      
-      if (result.success) {
-        navigate('/');
+      if (forgotMode) {
+        // Forgot Password - call actual API
+        const result = await forgotPassword(email);
+        
+        if (result.success) {
+          setMessage(result.message || 'Password reset link sent to your email');
+        } else {
+          setError(result.message || 'Failed to send reset link. Please try again.');
+        }
       } else {
-        setError(result.message || 'Login failed. Please try again.');
+        const result = await login(email, password);
+        
+        if (result.success) {
+          navigate('/');
+        } else {
+          setError(result.message || 'Login failed. Please try again.');
+        }
       }
     } catch (err) {
       setError(err.message || 'An error occurred. Please try again.');
@@ -45,7 +60,6 @@ const Login = () => {
     }
   };
 
-  // Show loading while checking authentication
   if (authLoading) {
     return (
       <div className="login-container">
@@ -59,15 +73,15 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h2 className="login-title">Login</h2>
+        <h2 className="login-title">
+          {forgotMode ? 'Forgot Password' : 'Login'}
+        </h2>
         
-        {error && (
-          <div className="login-error">
-            {error}
-          </div>
-        )}
+        {error && <div className="login-error">{error}</div>}
+        {message && <div className="login-success">{message}</div>}
 
         <form onSubmit={handleSubmit} className="login-form">
+          
           <div className="login-form-group">
             <label htmlFor="email" className="login-label">
               Email
@@ -83,40 +97,76 @@ const Login = () => {
             />
           </div>
 
-          <div className="login-form-group">
-            <label htmlFor="password" className="login-label">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="login-input"
-              placeholder="Enter your password"
-              required
-            />
-          </div>
+          {!forgotMode && (
+            <div className="login-form-group">
+              <label htmlFor="password" className="login-label">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="login-input"
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+          )}
+
+          {/* 🔥 Forgot Password Toggle */}
+          {!forgotMode && (
+            <p className="login-forgot">
+              <span onClick={() => {
+                setForgotMode(true);
+                setError('');
+                setMessage('');
+              }}>
+                Forgot Password?
+              </span>
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={loading}
             className="login-button"
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading
+              ? 'Processing...'
+              : forgotMode
+              ? 'Send Reset Link'
+              : 'Login'}
           </button>
         </form>
 
-        <p className="login-link-text">
-          Don't have an account?{' '}
-          <Link to="/signup" className="login-link">
-            Sign up
-          </Link>
-        </p>
+        {/* 🔁 Back to Login */}
+        {forgotMode && (
+          <p className="login-link-text">
+            <span
+              onClick={() => {
+                setForgotMode(false);
+                setMessage('');
+                setError('');
+              }}
+              className="login-link"
+            >
+              Back to Login
+            </span>
+          </p>
+        )}
+
+        {!forgotMode && (
+          <p className="login-link-text">
+            Don't have an account?{' '}
+            <Link to="/signup" className="login-link">
+              Sign up
+            </Link>
+          </p>
+        )}
       </div>
     </div>
   );
 };
 
 export default Login;
-
