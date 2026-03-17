@@ -2,7 +2,7 @@ import React from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import '../App.css';
 
-const ResultBox = ({ result, confidence, confidenceLevel, keyInfluentialWords }) => {
+const ResultBox = ({ result, confidence, confidenceLevel, keyInfluentialWords, analysisId, timestamp }) => {
   const getResultDetails = () => {
     if (!result) return null;
     
@@ -121,14 +121,14 @@ const ResultBox = ({ result, confidence, confidenceLevel, keyInfluentialWords })
         <div className="result-item">
           <span className="result-label">Analysis ID:</span>
           <span className="result-value">
-            {Math.random().toString(36).substr(2, 9).toUpperCase()}
+            {analysisId ? analysisId.toUpperCase() : 'N/A'}
           </span>
         </div>
         
         <div className="result-item">
           <span className="result-label">Timestamp:</span>
           <span className="result-value">
-            {new Date().toLocaleString()}
+            {timestamp ? new Date(timestamp).toLocaleString() : new Date().toLocaleString()}
           </span>
         </div>
       </div>

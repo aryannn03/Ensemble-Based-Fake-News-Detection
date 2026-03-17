@@ -29,18 +29,39 @@
   50% { transform: translate(-2%, 2%); }
 }
 
+
+/* ===== IMPROVED SIGNUP CARD ===== */
 .signup-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
+
   background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(30px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(35px);
+
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 28px;
-  padding: 45px 40px;
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.4);
+
+  padding: 50px 45px;
+
+  box-shadow:
+    0 25px 80px rgba(0, 0, 0, 0.45),
+    0 10px 35px rgba(236, 72, 153, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+
   position: relative;
   z-index: 1;
+
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
   animation: cardFloat 0.6s ease;
+}
+
+.signup-card:hover {
+  transform: translateY(-6px) scale(1.01);
+
+  box-shadow:
+    0 35px 100px rgba(0, 0, 0, 0.55),
+    0 15px 45px rgba(236, 72, 153, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 @keyframes cardFloat {
@@ -54,17 +75,43 @@
   }
 }
 
+/* top glow line */
 .signup-card::before {
   content: '';
   position: absolute;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 60%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  width: 65%;
+  height: 2px;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(244, 114, 182, 0.7),
+    transparent
+  );
 }
 
+/* glow behind card */
+.signup-card::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+
+  border-radius: 28px;
+
+  background: radial-gradient(
+    circle at top,
+    rgba(236, 72, 153, 0.15),
+    transparent 70%
+  );
+
+  z-index: -1;
+}
+
+
+/* ===== HEADER ===== */
 .signup-header {
   text-align: center;
   margin-bottom: 35px;
@@ -98,47 +145,74 @@
   font-size: 15px;
 }
 
+
+/* ===== FORM ===== */
 .signup-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 22px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 18px; /* increased spacing between label and input */
 }
 
 .form-group label {
   color: #f8fafc;
   font-size: 14px;
   font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
+/* ===== IMPROVED INPUT DESIGN ===== */
 .form-group input {
-  padding: 16px 20px;
-  background: rgba(15, 23, 42, 0.6);
-  border: 2px solid rgba(255, 255, 255, 0.1);
+  padding: 20px 22px;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1.8px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
   color: #ffffff;
   font-size: 15px;
   font-family: inherit;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  transition: all 0.35s ease;
+  backdrop-filter: blur(14px);
+
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255,255,255,0.03),
+    0 4px 18px rgba(0,0,0,0.25),
+    0 0 0 0 rgba(236, 72, 153, 0);
 }
 
+/* hover effect */
+.form-group input:hover {
+  border-color: rgba(255,255,255,0.25);
+  box-shadow: 0 6px 22px rgba(0,0,0,0.35);
+}
+
+/* focus animation */
 .form-group input:focus {
   outline: none;
   border-color: #ec4899;
-  box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.15), 0 0 30px rgba(236, 72, 153, 0.2);
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(15, 23, 42, 0.75);
+
+  box-shadow:
+    0 0 0 3px rgba(236, 72, 153, 0.15),
+    0 10px 30px rgba(236, 72, 153, 0.25),
+    inset 0 0 0 1px rgba(255,255,255,0.05);
+
+  transform: translateY(-1px);
 }
 
 .form-group input::placeholder {
-  color: #cbd5e1;
+  color: #94a3b8;
+  font-size: 14px;
+  letter-spacing: 0.3px;
 }
 
+
+/* ===== BUTTON ===== */
 .signup-button {
   padding: 16px 30px;
   background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
@@ -176,6 +250,8 @@
   to { transform: rotate(360deg); }
 }
 
+
+/* ===== ERROR ===== */
 .error-message {
   padding: 14px 18px;
   background: rgba(239, 68, 68, 0.15);
@@ -193,6 +269,8 @@
   75% { transform: translateX(5px); }
 }
 
+
+/* ===== FOOTER ===== */
 .signup-footer {
   text-align: center;
   margin-top: 30px;
@@ -217,7 +295,8 @@
   text-decoration: underline;
 }
 
-/* Responsive */
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {
   .signup-card {
     padding: 35px 25px;
