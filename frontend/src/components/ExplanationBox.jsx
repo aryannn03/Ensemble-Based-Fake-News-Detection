@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart, Defs, LinearGradient } from 'recharts';
+import '../App.css';
 
 const ExplanationBox = ({ explanation, confidence, keyInfluentialWords, explanationData }) => {
   const [isExpanded, setIsExpanded] = useState(false);

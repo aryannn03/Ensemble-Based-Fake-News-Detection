@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import ResultBox from './ResultBox';
 import ExplanationBox from './ExplanationBox';
 import InfluentialWordsGraph from './InfluentialWordsGraph';
+import '../App.css';
 
 const InputBox = () => {
   const [text, setText] = useState('');
