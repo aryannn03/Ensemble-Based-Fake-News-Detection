@@ -5,8 +5,6 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import InputBox from './components/InputBox';
-import ResultBox from './components/ResultBox';
-import ExplanationBox from './components/ExplanationBox';
 import './App.css'; // ✅ IMPORTANT: Import CSS
 
 // Home component
