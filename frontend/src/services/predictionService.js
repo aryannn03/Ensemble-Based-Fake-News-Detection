@@ -127,8 +127,10 @@ export const deletePrediction = async (id) => {
   }
 };
 
-export default {
+const predictionService =  {
   analyzeNews,
   getPredictionHistory,
   deletePrediction,
 };
+
+export default predictionService;

@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
 import ResultBox from './ResultBox';
 import ExplanationBox from './ExplanationBox';
-import InfluentialWordsGraph from './InfluentialWordsGraph';
 import { analyzeNews } from '../services/predictionService';
 import '../App.css';
 
@@ -17,11 +15,6 @@ const InputBox = () => {
   const [analysisId, setAnalysisId] = useState(null);
   const [timestamp, setTimestamp] = useState(null);
   
-  // Remove unused user variable or use it
-  // Option 1: Remove it (if not using it)
-  // Option 2: Keep it for future use with comment
-  const { user } = useAuth(); // Will be used for API authentication
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim()) {
@@ -75,7 +68,7 @@ const InputBox = () => {
       <div className="input-header">
         <h2>📰 Fake News Detection System</h2>
         <p className="subtitle">
-          Enter news article or statement to analyze its authenticity using AI-powered ensemble methods
+          Enter news article to analyze its authenticity based on its written pattern using robust mechanism
         </p>
       </div>
 
@@ -127,7 +120,6 @@ const InputBox = () => {
 
       {result && <ResultBox result={result} confidence={confidence} confidenceLevel={confidenceLevel} keyInfluentialWords={keyInfluentialWords} analysisId={analysisId} timestamp={timestamp} />}
       {explanation && <ExplanationBox explanation={explanation} confidence={confidence} keyInfluentialWords={keyInfluentialWords} explanationData={{ key_influential_words: keyInfluentialWords }} />}
-      {keyInfluentialWords && <InfluentialWordsGraph words={keyInfluentialWords} />}
     </div>
   );
 };

@@ -5,15 +5,14 @@ import { forgotPassword } from '../services/authService';
 import '../style/Login.css';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  // NEW STATE
+  const [error, setError]       = useState('');
+  const [message, setMessage]   = useState('');
+  const [loading, setLoading]   = useState(false);
   const [forgotMode, setForgotMode] = useState(false);
-  const [message, setMessage] = useState('');
-  
+  const [showPassword, setShowPassword] = useState(false);
+
   const { login, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
@@ -36,9 +35,7 @@ const Login = () => {
 
     try {
       if (forgotMode) {
-        // Forgot Password - call actual API
         const result = await forgotPassword(email);
-        
         if (result.success) {
           setMessage(result.message || 'Password reset link sent to your email');
         } else {
@@ -46,7 +43,6 @@ const Login = () => {
         }
       } else {
         const result = await login(email, password);
-        
         if (result.success) {
           navigate('/');
         } else {
@@ -64,7 +60,10 @@ const Login = () => {
     return (
       <div className="login-container">
         <div className="login-card">
-          <div className="login-loading">Loading...</div>
+          <div className="login-loading">
+            <span className="login-spinner"></span>
+            <p>Loading...</p>
+          </div>
         </div>
       </div>
     );
@@ -73,97 +72,96 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h2 className="login-title">
-          {forgotMode ? 'Forgot Password' : 'Login'}
-        </h2>
-        
-        {error && <div className="login-error">{error}</div>}
-        {message && <div className="login-success">{message}</div>}
 
+        {/* Header */}
+        <div className="login-header">
+          <span className="login-icon">🛡️</span>
+          <h1>{forgotMode ? 'Reset Password' : 'Welcome Back'}</h1>
+          <p>{forgotMode ? 'Enter your email to receive a reset link' : 'Sign in to Fake News Detector'}</p>
+        </div>
+
+        {/* Alerts */}
+        {error   && <div className="alert alert-error">⚠️ {error}</div>}
+        {message && <div className="alert alert-success">✅ {message}</div>}
+
+        {/* Form */}
         <form onSubmit={handleSubmit} className="login-form">
-          
-          <div className="login-form-group">
-            <label htmlFor="email" className="login-label">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="login-input"
-              placeholder="Enter your email"
-              required
-            />
-          </div>
 
-          {!forgotMode && (
-            <div className="login-form-group">
-              <label htmlFor="password" className="login-label">
-                Password
-              </label>
+          <div className="form-group">
+            <label htmlFor="email">E-mail</label>
+            <div className="input-wrapper">
+              <span className="input-icon">📧</span>
               <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="login-input"
-                placeholder="Enter your password"
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your e-mail"
                 required
               />
             </div>
+          </div>
+
+          {!forgotMode && (
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <div className="input-wrapper">
+                <span className="input-icon">🔒</span>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                />
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  {showPassword ? '😴' : '🫣'}
+                </button>
+              </div>
+            </div>
           )}
 
-          {/* 🔥 Forgot Password Toggle */}
           {!forgotMode && (
-            <p className="login-forgot">
-              <span onClick={() => {
-                setForgotMode(true);
-                setError('');
-                setMessage('');
-              }}>
+            <p className="forgot-link">
+              <span onClick={() => { setForgotMode(true); setError(''); setMessage(''); }}>
                 Forgot Password?
               </span>
             </p>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="login-button"
-          >
-            {loading
-              ? 'Processing...'
-              : forgotMode
-              ? 'Send Reset Link'
-              : 'Login'}
+          <button type="submit" disabled={loading} className="login-button">
+            {loading ? (
+              <><span className="login-spinner"></span> Processing...</>
+            ) : forgotMode ? (
+              '📧 Send Reset Link'
+            ) : (
+              '🔑 Sign In'
+            )}
           </button>
         </form>
 
-        {/* 🔁 Back to Login */}
-        {forgotMode && (
-          <p className="login-link-text">
-            <span
-              onClick={() => {
-                setForgotMode(false);
-                setMessage('');
-                setError('');
-              }}
-              className="login-link"
-            >
-              Back to Login
-            </span>
-          </p>
-        )}
+        {/* Footer */}
+        <div className="login-footer">
+          {forgotMode ? (
+            <p>
+              <span className="login-link" onClick={() => { setForgotMode(false); setMessage(''); setError(''); }}>
+                ← Back to Login
+              </span>
+            </p>
+          ) : (
+            <p>
+              Don't have an account?{' '}
+              <Link to="/signup" className="login-link">Sign up</Link>
+            </p>
+          )}
+        </div>
 
-        {!forgotMode && (
-          <p className="login-link-text">
-            Don't have an account?{' '}
-            <Link to="/signup" className="login-link">
-              Sign up
-            </Link>
-          </p>
-        )}
       </div>
     </div>
   );
