@@ -166,6 +166,6 @@ def predict_news(text: str):
     "confidence_level": reliability_note,
     "key_influential_words": word_explanation,
     "explanation_note": (
-        "Highlighted words influenced the model’s decision more strongly than other words in the article."
+        "Highlighted words influence the model’s decision more strongly than other words in the article"
     )
 }
