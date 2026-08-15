@@ -132,7 +132,7 @@ REACT_APP_API_URL=http://localhost:8000/api
 
 ---
 
-## 5. Run the whole project (3 VS Code terminals)
+## 5. Run the whole project (VS Code terminals)
 
 Use three separate terminal tabs/panes in VS Code — one per service — and keep all three running at the same time.
 
@@ -192,13 +192,13 @@ Once all three services are running, open **http://localhost:3000**.
 Below are the interface previews for the three main pages. Add your own screenshots by following the steps underneath each image.
 
 ### Signup Page
-![Signup Page](docs/screenshots/signup.png)
+![Signup Page](screenshots/signup.png)
 
 ### Login Page
-![Login Page](docs/screenshots/login.png)
+![Login Page](screenshots/login.png)
 
 ### Home Page
-![Home Page](docs/screenshots/home.png)
+![Home Page](screenshots/home.png)
 
 ## Quick Start Summary
 
